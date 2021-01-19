@@ -24,10 +24,15 @@ Tree* tree;
 typedef void visit(Node *);
 typedef void not_found();
 
-void initTree();
+void initTree(Node* root);
 void insert(Node *root, Node *node);
 void dfs_preorder(Node* root, visit v);
+void dfs_middleorder(Node *root, visit v);
+void dfs_postorder(Node *root, visit v);
 void search(Node *node, int key, visit v, not_found not);
+int search2(Node *node, int key);
+int search3(Node *node, int key);
+int delete (Node *root, int key);
 Node* newNode(int key, int value);
 
 #endif

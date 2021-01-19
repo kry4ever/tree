@@ -2,22 +2,124 @@
 
 Tree *tree = NULL;
 
-void initTree()
+void initTree(Node *root)
 {
     if (tree == NULL)
     {
         tree = (Tree *)malloc(sizeof(Tree));
-        tree->root = NULL;
+        tree->root = root;
     }
 }
 
-Node* newNode(int key, int value){
-    Node* result = (Node*)malloc(sizeof(Node));
+Node *newNode(int key, int value)
+{
+    Node *result = (Node *)malloc(sizeof(Node));
     result->key = key;
     result->value = value;
     result->left = NULL;
     result->right = NULL;
     return result;
+}
+
+void _replace_current_with_max_in_left(Node *cur)
+{
+    Node *finder = cur->left;
+    Node *maxInLeft = finder;
+    Node *parent = cur;
+    while (finder != NULL)
+    {
+        if (maxInLeft != finder)
+        {
+            parent = maxInLeft;
+        }
+        maxInLeft = finder;
+        finder = finder->right;
+    }
+    cur->key = maxInLeft->key;
+    cur->value = maxInLeft->value;
+    if (parent->right == maxInLeft)
+    {
+        parent->right = NULL;
+    }
+    else if (parent->left == maxInLeft)
+    {
+        parent->left = maxInLeft->left;
+    }
+    free(maxInLeft);
+}
+
+int delete (Node *root, int key)
+{
+    Node *cur = root;
+    Node *parent = cur;
+    while (cur != NULL)
+    {
+        if (cur->key == key)
+        {
+            break;
+        }
+        else if (cur->key < key)
+        {
+            parent = cur;
+            cur = cur->right;
+        }
+        else
+        {
+            parent = cur;
+            cur = cur->left;
+        }
+    }
+
+    if (cur == NULL)
+    {
+        return -1;
+    }
+
+    if (cur == root)
+    {
+        if (cur->left == NULL && cur->right == NULL)
+        {
+            tree->root = NULL;
+        }
+        else if (cur->left == NULL)
+        {
+            tree->root = cur->right;
+            free(cur);
+        }
+        else if (cur->right == NULL)
+        {
+            tree->root = cur->left;
+            free(cur);
+        }
+        else
+        {
+            _replace_current_with_max_in_left(cur);
+        }
+    }
+    else if (cur->left == NULL && cur->right == NULL)
+    {
+        if (parent->left == cur)
+        {
+            parent->left = NULL;
+        }
+        else
+        {
+            parent->right = NULL;
+        }
+
+        free(cur);
+    }
+    else if (cur->left == NULL)
+    {
+        parent->right = cur->right;
+        free(cur);
+    }
+    else
+    {
+        _replace_current_with_max_in_left(cur);
+    }
+
+    return 0;
 }
 
 void insert(Node *root, Node *node)
@@ -68,7 +170,31 @@ void dfs_preorder(Node *root, visit v)
     dfs_preorder(root->right, v);
 }
 
-void search(Node *node, int key, visit v, not_found not)
+void dfs_middleorder(Node *root, visit v)
+{
+    if (root == NULL)
+    {
+        return;
+    }
+
+    dfs_middleorder(root->left, v);
+    v(root);
+    dfs_middleorder(root->right, v);
+}
+
+void dfs_postorder(Node *root, visit v)
+{
+    if (root == NULL)
+    {
+        return;
+    }
+
+    dfs_postorder(root->left, v);
+    dfs_postorder(root->right, v);
+    v(root);
+}
+
+void search(Node *node, int key, visit v, not_found not )
 {
     if (node == NULL)
     {
@@ -82,10 +208,53 @@ void search(Node *node, int key, visit v, not_found not)
     }
     else if (key < node->key)
     {
-        search(node->left, key, v, not);
+        search(node->left, key, v, not );
     }
     else
     {
-        search(node->right, key, v, not);
+        search(node->right, key, v, not );
     }
+}
+
+int search2(Node *node, int key)
+{
+    if (node == NULL)
+    {
+        return -1;
+    }
+
+    if (node->key == key)
+    {
+        return node->value;
+    }
+    else if (key < node->key)
+    {
+        return search2(node->left, key);
+    }
+    else
+    {
+        return search2(node->right, key);
+    }
+}
+
+int search3(Node *node, int key)
+{
+    Node *p = node;
+    while (p != NULL)
+    {
+        if (p->key == key)
+        {
+            return p->value;
+        }
+        else if (p->key < key)
+        {
+            p = p->right;
+        }
+        else
+        {
+            p = p->left;
+        }
+    }
+
+    return -1;
 }
